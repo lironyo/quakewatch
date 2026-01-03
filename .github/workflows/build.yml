@@ -9,14 +9,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+          
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
 
       - name: Bump version
         run: |
-          pip install bump2version
-          bump2version patch --no-input
-
+          python -m pip install --upgrade pip
+          python -m pip install bump2version
+          python -m bump2version patch --no-input
 
       - name: Get version
         id: version
@@ -25,7 +39,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Found version: $VERSION"
 
-      - name: Push version bump
+      - name: Push commit & tag
         run: |
           git push origin main --tags
 
