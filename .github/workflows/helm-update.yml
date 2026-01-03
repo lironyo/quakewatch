@@ -38,7 +38,7 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           TOKEN="${{ secrets.HELM_REPO_TOKEN }}"
           
-          git clone --depth 1 https://x-access-token:${TOKEN}@github.com/lironyo/quakewatch-chart.git
+          git clone --depth 1 https://x-access-token:${TOKEN}@github.com/lironyo/quakewatch-chart.git .
           
           if [ ! -f values-prod.yaml ]; then
             echo "Error: values-prod.yaml not found"
