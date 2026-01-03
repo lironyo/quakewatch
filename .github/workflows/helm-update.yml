@@ -5,7 +5,7 @@ permissions:
 
 on:
   workflow_run:
-    workflows: ["Version Bump & Build Docker"]
+    workflows: ["Build & Push Docker"]
     types:
       - completed
     branches:
@@ -17,17 +17,16 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Checkout main repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get latest version
+      - name: Get version from tag
         id: version
         run: |
-          VERSION=$(grep 'current_version' .bumpversion.cfg | cut -d' ' -f3)
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION="main-${GITHUB_SHA::7}"
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Found version: $VERSION"
+          echo "Using version: $VERSION"
 
       - name: Checkout Helm chart repo
         uses: actions/checkout@v4
@@ -38,52 +37,25 @@ jobs:
 
       - name: Update Helm values
         run: |
-          python3 - <<'PY'
-          import re
-          import os
-          
-          values_file = 'helm-repo/values-prod.yaml'
-          version = '${{ steps.version.outputs.version }}'
-          
-          if not os.path.exists(values_file):
-              raise SystemExit(f"Error: {values_file} not found")
-          
-          with open(values_file, 'r', encoding='utf-8') as f:
-              content = f.read()
-          
-          updated = re.sub(
-              r'tag:\s*["\']?\S+["\']?',
-              f'tag: "{version}"',
-              content,
-          )
-          
-          if 'tag:' not in updated:
-              updated = re.sub(
-                  r'(repository:\s*[^\n]+\n)',
-                  f'\\1  tag: "{version}"\n',
-                  updated,
-              )
-          
-          with open(values_file, 'w', encoding='utf-8') as f:
-              f.write(updated)
-          
-          print(f"Updated {values_file} with image tag: {version}")
-          PY
+          cd helm-repo
+          if [ -f values-prod.yaml ]; then
+            sed -i "s/tag:.*/tag: \"${{ steps.version.outputs.version }}\"/" values-prod.yaml
+            echo "Updated values-prod.yaml with tag: ${{ steps.version.outputs.version }}"
+          else
+            echo "Warning: values-prod.yaml not found"
+            exit 1
+          fi
 
-      - name: Commit and push Helm chart
+      - name: Commit and push
         run: |
           cd helm-repo
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add values-prod.yaml
-          git diff --cached --quiet || (
-            git commit -m "chore: update image version to ${{ steps.version.outputs.version }}"
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update image to ${{ steps.version.outputs.version }}"
             git push
-          )
-          echo "Helm chart updated: lironyo98/flask_quakeqatch:${{ steps.version.outputs.version }}"
-
-      - name: Notify update
-        run: |
-          echo "✓ Helm chart repository updated"
-          echo "Image version: ${{ steps.version.outputs.version }}"
-          echo "Repository: lironyo98/flask_quakeqatch-chart"
+            echo "✓ Updated Helm chart to version ${{ steps.version.outputs.version }}"
+          fi
