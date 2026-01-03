@@ -62,7 +62,7 @@ jobs:
           
           echo "✓ Updated all version references to ${VERSION}"
 
-      - name: Commit version updates
+      - name: Commit version updates .bumpversion.cfg
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           git add docker-compose.yml Install-README.md pod.yaml k8s/deployment.yaml README.md
@@ -70,9 +70,7 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
-            git tag -a release-${{ steps.version.outputs.version }} -m "Release version ${{ steps.version.outputs.version }}"
             git push origin main
-            git push origin release-${{ steps.version.outputs.version }}
           fi
 
       - name: Login to Docker Hub
