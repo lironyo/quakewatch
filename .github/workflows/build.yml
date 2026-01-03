@@ -14,8 +14,8 @@ jobs:
 
       - name: Bump version
         run: |
-          pip install bump2version
-          bump2version patch --no-input
+          pip install bumpversion
+          bumpversion patch --no-input
 
       - name: Get version
         id: version
