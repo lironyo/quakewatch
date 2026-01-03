@@ -17,13 +17,16 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Get version from tag
+      - name: Get version from build workflow
         id: version
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/v}
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          if [[ "$BRANCH" == v* ]]; then
+            VERSION=${BRANCH#v}
+            echo "Tag build detected: $VERSION"
           else
-            VERSION="main-${GITHUB_SHA::7}"
+            VERSION="latest"
+            echo "Main branch build, using: $VERSION"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Using version: $VERSION"
