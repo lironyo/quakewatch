@@ -1,5 +1,8 @@
 name: Update Helm Chart
 
+permissions:
+  contents: read
+
 on:
   workflow_run:
     workflows: ["Version Bump & Build Docker"]
@@ -16,6 +19,8 @@ jobs:
     steps:
       - name: Checkout main repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get latest version
         id: version
@@ -33,6 +38,7 @@ jobs:
 
       - name: Update Helm values
         run: |
+          python3 - <<'PY'
           import re
           import os
           
@@ -40,32 +46,29 @@ jobs:
           version = '${{ steps.version.outputs.version }}'
           
           if not os.path.exists(values_file):
-              print(f"Error: {values_file} not found")
-              exit(1)
+              raise SystemExit(f"Error: {values_file} not found")
           
-          with open(values_file, 'r') as f:
+          with open(values_file, 'r', encoding='utf-8') as f:
               content = f.read()
           
-          # Update image.tag
           updated = re.sub(
               r'tag:\s*["\']?\S+["\']?',
               f'tag: "{version}"',
-              content
+              content,
           )
           
-          # If tag line doesn't exist, add it under image.repository
           if 'tag:' not in updated:
               updated = re.sub(
                   r'(repository:\s*[^\n]+\n)',
                   f'\\1  tag: "{version}"\n',
-                  updated
+                  updated,
               )
           
-          with open(values_file, 'w') as f:
+          with open(values_file, 'w', encoding='utf-8') as f:
               f.write(updated)
           
           print(f"Updated {values_file} with image tag: {version}")
-        shell: python
+          PY
 
       - name: Commit and push Helm chart
         run: |
