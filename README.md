@@ -27,7 +27,7 @@ Flask-based web application for real-time earthquake data visualization. Product
 **⎈ Helm Update** → Triggered after successful build:
 1. Reads version from `.bumpversion.cfg`
 2. Updates `values-prod.yaml` in separate helm chart repository
-3. Commits and pushes to helm repo
+3. Commits and pushes to helm repo that push the helm to dockerhub with the new tag
 
 ### 🔗 Version Synchronization
 
@@ -46,12 +46,12 @@ Release tags automatically update:
 ## 🚀 Release Process
 
 ```bash
-git tag v0.2.1
-git push origin v0.2.1
+git tag v0.2.0
+git push origin v0.2.0
 
 # Pipeline automatically:
 # • Updates all version references
-# • Builds Docker image: lironyo98/flask_quakeqatch:0.2.1
+# • Builds Docker image: lironyo98/flask_quakeqatch:0.2.0
 # • Updates Helm chart in separate repo
 ```
 
@@ -82,20 +82,25 @@ docker compose up -d
 ### ☸️ Kubernetes
 
 ```bash
-kubectl apply -f pod.yaml          # Single pod
-kubectl apply -f k8s/              # Full deployment
+kubectl apply -f pod.yaml
+kubectl apply -f k8s/
+kubectl port-forward svc/flask_quakeqatch 5000:5000
 ```
-
 ---
 
 ## 💻 Local Development
 
+**Direct Flask**
 ```bash
+git clone https://github.com/lironyo98/QuakeWatch.git
+cd QuakeWatch
+python -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 python app.py
 ```
-
 Visit http://localhost:5000
+
 
 
 ## Release Process
@@ -131,37 +136,3 @@ QuakeWatch/
 ├── templates/                # Flask templates
 └── static/                   # Assets
 ```
-
----
-
-## Local Development
-
-**Direct Flask**
-```bash
-git clone https://github.com/lironyo98/QuakeWatch.git
-cd QuakeWatch
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python app.py
-```
-Visit http://localhost:5000
-
-**Docker**
-```bash
-docker build -t quakewatch:local .
-docker run -p 5000:5000 quakewatch:local
-```
-
-**Docker Compose**
-```bash
-docker compose up
-```
-
-**Kubernetes (Local)**
-```bash
-kubectl apply -f pod.yaml
-kubectl apply -f k8s/
-kubectl port-forward svc/flask_quakeqatch 5000:5000
-```
-Visit http://localhost:5000
