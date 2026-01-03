@@ -8,8 +8,6 @@ on:
     workflows: ["Build & Push Docker"]
     types:
       - completed
-    branches:
-      - main
 
 jobs:
   update-helm:
@@ -17,48 +15,48 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Get version from build workflow
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
         id: version
         run: |
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
-          if [[ "$BRANCH" == v* ]]; then
-            VERSION=${BRANCH#v}
-            echo "Tag build detected: $VERSION"
+          # Get latest tag if it exists
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$LATEST_TAG" ]; then
+            VERSION=${LATEST_TAG#v}
           else
             VERSION="latest"
-            echo "Main branch build, using: $VERSION"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Using version: $VERSION"
 
-      - name: Checkout Helm chart repo
-        uses: actions/checkout@v4
-        with:
-          repository: lironyo98/flask_quakeqatch-chart
-          token: ${{ secrets.HELM_REPO_TOKEN }}
-          path: helm-repo
-
-      - name: Update Helm values
+      - name: Update Helm chart
+        env:
+          HELM_TOKEN: ${{ secrets.HELM_REPO_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
+          git clone --depth 1 https://x-access-token:${HELM_TOKEN}@github.com/lironyo98/flask_quakeqatch-chart.git helm-repo
           cd helm-repo
-          if [ -f values-prod.yaml ]; then
-            sed -i "s/tag:.*/tag: \"${{ steps.version.outputs.version }}\"/" values-prod.yaml
-            echo "Updated values-prod.yaml with tag: ${{ steps.version.outputs.version }}"
-          else
-            echo "Warning: values-prod.yaml not found"
+          
+          if [ ! -f values-prod.yaml ]; then
+            echo "Error: values-prod.yaml not found"
             exit 1
           fi
-
-      - name: Commit and push
-        run: |
-          cd helm-repo
+          
+          sed -i "s/tag:.*/tag: \"${VERSION}\"/" values-prod.yaml
+          echo "Updated values-prod.yaml with tag: ${VERSION}"
+          
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add values-prod.yaml
+          
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: update image to ${{ steps.version.outputs.version }}"
-            git push
-            echo "✓ Updated Helm chart to version ${{ steps.version.outputs.version }}"
+            git commit -m "chore: update image to ${VERSION}"
+            git push origin main
+            echo "✓ Updated Helm chart to ${VERSION}"
           fi
