@@ -23,7 +23,7 @@ jobs:
       - name: Get version
         id: version
         run: |
-          VERSION=$(grep 'current_version' .bumpversion.cfg | cut -d' ' -f3)
+          VERSION=$(awk -F' *= *' '/^current_version/ {print $2}' .bumpversion.cfg)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Using version: $VERSION"
 
