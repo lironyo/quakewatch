@@ -23,10 +23,10 @@ jobs:
       - name: Get version
         id: version
         run: |
-          # Get latest tag if it exists
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          # Get latest release tag (created by build workflow)
+          LATEST_TAG=$(git describe --tags --match "release-*" --abbrev=0 2>/dev/null || echo "")
           if [ -n "$LATEST_TAG" ]; then
-            VERSION=${LATEST_TAG#v}
+            VERSION=${LATEST_TAG#release-}
           else
             VERSION="latest"
           fi
