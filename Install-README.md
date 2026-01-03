@@ -13,7 +13,7 @@ Flask-based web application for real-time earthquake data visualization. Product
 **lint.yml** - Push to main / PR  
 Python quality checks across Python 3.11, 3.12, 3.13. Fails if code quality threshold not met.
 
-**build.yml** - Git tag `v*` (e.g., `v0.2.1`)  
+**build.yml** - Git tag `v*`  
 Extracts version, updates all config files, commits to main, builds and pushes Docker image to Docker Hub.
 
 **helm-update.yml** - Triggered after build success  
@@ -54,7 +54,7 @@ helm install quakewatch quakewatch/flask_quakeqatch -f values-prod.yaml -n produ
 4. Commits to main branch
 5. Builds Docker image: `lironyo98/flask_quakeqatch:(with the relavent tag version by github action autumation)
 6. Helm workflow triggers
-7. Updates Helm chart repository with version 0.2.1
+7. Updates Helm chart repository with version 
 8. ✅ Complete
 
 ---
