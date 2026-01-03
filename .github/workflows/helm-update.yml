@@ -38,7 +38,7 @@ jobs:
           HELM_TOKEN: ${{ secrets.HELM_REPO_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          git clone --depth 1 https://x-access-token:${HELM_TOKEN}@github.com/lironyo98/flask_quakeqatch-chart.git helm-repo
+          git clone --depth 1 https://x-access-token:${HELM_REPO_TOKEN}@github.com/lironyo98/flask_quakeqatch-chart.git helm-repo
           cd helm-repo
           
           if [ ! -f values-prod.yaml ]; then
