@@ -18,6 +18,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
       - name: Configure git user
         run: |
           git config user.name "github-actions"
@@ -25,8 +31,9 @@ jobs:
 
       - name: Bump version
         run: |
-          pip install bumpversion
-          bumpversion patch --no-input
+          python -m pip install --upgrade pip
+          python -m pip install --no-cache-dir bump2version
+          bump2version patch --no-input
 
       - name: Get version
         id: version
