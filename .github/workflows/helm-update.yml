@@ -34,11 +34,11 @@ jobs:
           echo "Using version: $VERSION"
 
       - name: Update Helm chart
-        env:
-          HELM_TOKEN: ${{ secrets.HELM_REPO_TOKEN }}
-          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          git clone --depth 1 https://x-access-token:${HELM_REPO_TOKEN}@github.com/lironyo98/flask_quakeqatch-chart.git helm-repo
+          VERSION="${{ steps.version.outputs.version }}"
+          TOKEN="${{ secrets.HELM_REPO_TOKEN }}"
+          
+          git clone --depth 1 https://x-access-token:${TOKEN}@github.com/lironyo98/flask_quakeqatch-chart.git helm-repo
           cd helm-repo
           
           if [ ! -f values-prod.yaml ]; then
