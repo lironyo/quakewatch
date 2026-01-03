@@ -1,4 +1,4 @@
-# QuakeWatch - DevOps Pipeline
+# QuakeWatch
 
 Flask-based web application for real-time earthquake data visualization. Production-ready with automated CI/CD, version management, and multi-repository deployment strategy.
 
@@ -8,7 +8,7 @@ Flask-based web application for real-time earthquake data visualization. Product
 
 ---
 
-## 🔄 CI/CD Architecture
+## 🔄 CI/CD Architecture and Pipeline
 1. **🔍 Code Quality** - Lint workflow validates Python code across 3.11-3.13 on every push/PR
 2. **🏷️ Version Tagging** - Developer pushes git tag to trigger release
 3. **📝 File Updates** - Build workflow updates 6 files with new version and commits to main
