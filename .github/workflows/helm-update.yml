@@ -20,7 +20,7 @@ jobs:
       - name: Get latest version
         id: version
         run: |
-          VERSION=$(cat version.txt)
+          VERSION=$(grep 'current_version' .bumpversion.cfg | cut -d' ' -f3)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Found version: $VERSION"
 

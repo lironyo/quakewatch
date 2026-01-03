@@ -19,5 +19,5 @@ metadata:
     app: flask-quake-watch
 spec:
   containers:
-  - image: lironyo98/flask_quakeqatch:v0.1
+  - image: lironyo98/flask_quakeqatch:0.2.0
     name: quake-watch-container

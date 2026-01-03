@@ -2,8 +2,8 @@
 
 Flask-based web application for real-time and historical earthquake data visualization from USGS API.
 
-**Version:** 0.2.0  
-**Docker image:** `lironyo98/flask_quakeqatch`  
+**Version:** 0.2.0
+**Docker image:** `lironyo98/flask_quakeqatch`
 **Helm Chart:** `lironyo98/flask_quakeqatch-chart`
 
 ## CI/CD Pipeline
@@ -39,7 +39,6 @@ QuakeWatch/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── .bumpversion.cfg
-├── version.txt
 ├── requirements.txt
 └── README.md
 ```

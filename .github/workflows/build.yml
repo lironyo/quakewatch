@@ -17,6 +17,13 @@ jobs:
           pip install bump2version
           bump2version patch --no-input
 
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(grep 'current_version' .bumpversion.cfg | cut -d' ' -f3)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Found version: $VERSION"
+
       - name: Push version bump
         run: |
           git push origin main --tags
@@ -33,5 +40,5 @@ jobs:
           context: .
           push: true
           tags: |
-            lironyo98/flask_quakeqatch:$(cat version.txt)
+            lironyo98/flask_quakeqatch:${{ steps.version.outputs.version }}
             lironyo98/flask_quakeqatch:latest

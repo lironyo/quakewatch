@@ -1,5 +1,6 @@
 services:
   web:
+    image: lironyo98/flask_quakeqatch:0.2.0
     build: .
     ports:
       - "5000:5000"

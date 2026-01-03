@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: quake-watch-container
-        image: lironyo98/flask_quakeqatch:v0.1
+        image: lironyo98/flask_quakeqatch:0.2.0
         ports:
         - containerPort: 5000
         resources:
