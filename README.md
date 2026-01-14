@@ -1,102 +1,114 @@
-![Screenshot of QuakeWatch](static/experts-logo.svg)
+# QuakeWatch - DevOps Pipeline
 
-# QuakeWatch
+Flask-based web application for real-time earthquake data visualization. Production-ready with automated CI/CD, version management, and multi-repository deployment strategy.
 
-**QuakeWatch** is a Flask-based web application designed to display real-time and historical earthquake data. It visualizes earthquake statistics with interactive graphs and provides detailed information sourced from the USGS Earthquake API. Built using an object‑oriented design and modular structure, QuakeWatch separates templates, utility functions, and route definitions, making it both scalable and maintainable. The application is also containerized with Docker for easy deployment.
+**Current Version:** 0.2.0  
+**Docker Repository:** `lironyo98/flask_quakeqatch`  
+**Helm Chart Repository:** `lironyo/flask_quakeqatch-chart` (separate repo, auto-updated)
 
-## Features
+---
 
-- **Real-Time & Historical Data:** Fetches earthquake data from the USGS API.
-- **Interactive Graphs:** Displays earthquake counts over various time periods (e.g., last 30 days, 5-year view) using Matplotlib.
-- **Top Earthquake Events:** Shows the top 5 worldwide earthquakes (last 30 days) by magnitude.
-- **Recent Earthquake Details:** Highlights the most recent earthquake event.
-- **RESTful Endpoints:** Provides endpoints for health checks, status, connectivity tests, and raw data.
-- **Clean UI:** Built with Bootstrap 5, featuring a professional navigation bar with a logo.
-- **Dockerized:** Easily containerized for streamlined deployment.
+## CI/CD Pipeline
+
+**lint.yml** - Push to main / PR  
+Python quality checks across Python 3.11, 3.12, 3.13. Fails if code quality threshold not met.
+
+**build.yml** - Git tag `v*` (e.g., `v0.2.1`)  
+Extracts version, updates all config files, commits to main, builds and pushes Docker image to Docker Hub.
+
+**helm-update.yml** - Triggered after build success  
+Reads version from `.bumpversion.cfg`, updates external Helm chart repository with new image version.
+
+**Strategy:** Main repository triggers automatic updates to separate Helm chart repository.
+
+---
+
+## Deployment
+
+**Docker**
+```bash
+docker pull lironyo98/flask_quakeqatch:latest
+docker run -p 5000:5000 lironyo98/flask_quakeqatch:latest
+```
+
+**Docker Compose**
+```bash
+docker compose up -d
+```
+
+**Kubernetes with Helm**
+```bash
+helm repo add quakewatch https://github.com/lironyo/flask_quakeqatch-chart
+helm repo update
+helm install quakewatch quakewatch/flask_quakeqatch -f values-prod.yaml -n production
+```
+
+---
+
+## Release Process
+
+**Automated flow:**
+1. Build workflow triggers on tag
+2. Extracts version 
+3. Updates all config files
+4. Commits to main branch
+5. Builds Docker image: `lironyo98/flask_quakeqatch:(with the relavent tag version by github action autumation)
+6. Helm workflow triggers
+7. Updates Helm chart repository with version 0.2.1
+8. ✅ Complete
+
+---
 
 ## Project Structure
 
 ```
 QuakeWatch/
-├── app.py                  # Application factory and entry point
-├── dashboard.py            # Blueprint & route definitions using OOP style
-├── utils.py                # Helper functions and custom Jinja2 filters
-├── requirements.txt        # Python dependencies
-├── static/
-│   └── experts-logo.svg    # Logo file used in the UI
-└── templates/              # Jinja2 HTML templates
-    ├── base.html           # Base template with common layout and navigation
-    ├── main_page.html      # Home page content
-    └── graph_dashboard.html# Dashboard view with graphs and earthquake details
+├── .github/workflows/
+│   ├── lint.yml              # Code quality checks
+│   ├── build.yml             # Version + Docker build
+│   └── helm-update.yml       # Updates Helm chart repo
+├── app.py
+├── dashboard.py
+├── utils.py
+├── Dockerfile
+├── docker-compose.yml
+├── .bumpversion.cfg          # Version source of truth
+├── requirements.txt
+├── k8s/                      # Kubernetes manifests
+├── templates/                # Flask templates
+└── static/                   # Assets
 ```
 
-## Installation
+---
 
-### Locally
+## Local Development
 
-1. **Clone the Repository:**
+**Direct Flask**
+```bash
+git clone https://github.com/lironyo98/QuakeWatch.git
+cd QuakeWatch
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python app.py
+```
+Visit http://localhost:5000
 
-   ```bash
-   git clone https://github.com/yourusername/QuakeWatch.git
-   cd QuakeWatch
-   ```
+**Docker**
+```bash
+docker build -t quakewatch:local .
+docker run -p 5000:5000 quakewatch:local
+```
 
-2. **Set Up a Virtual Environment (optional but recommended):**
+**Docker Compose**
+```bash
+docker compose up
+```
 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate   # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install Dependencies:**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Running the Application Locally
-
-1. **Start the Flask Application:**
-
-   ```bash
-   python app.py
-   ```
-### OR 
-
-
-## Build the image and run the container
-   
-1. Crete and config dockrfile to build the image, 
-   run in the project dir:
-   ```bash
-   docker build -t quakewatch .
-   ```
-   
-2. Crete docker-compose.yaml and run the container:
-  ```bash
-   docker compose up -d
-   ```
-
-### OR 
-
-pull the image from Doker Hub 
-   ```bash
-   docker pull lironyo98/flask_quakeqatch:0.2.0
-   ```
-
-   ```bash
-    docker compose up -d
-   ```
-
-# Access the Application:
-
-   Open your browser and visit [http://127.0.0.1:5000](http://127.0.0.1:5000) to view the dashboard.
-
-## Custom Jinja2 Filter
-
-The project includes a custom filter `timestamp_to_str` that converts epoch timestamps to human-readable strings. This filter is registered during application initialization and is used in the templates to format earthquake event times.
-
-## Known Issues
-
-- **SSL Warning:** You might see a warning regarding LibreSSL when using urllib3. This is informational and does not affect the functionality of the application.
-- **Matplotlib Backend:** The application forces Matplotlib to use the `Agg` backend for headless rendering. Ensure this setting is applied before any Matplotlib imports to avoid GUI-related errors.
+**Kubernetes (Local)**
+```bash
+kubectl apply -f pod.yaml
+kubectl apply -f k8s/
+kubectl port-forward svc/flask_quakeqatch 5000:5000
+```
+Visit http://localhost:5000
