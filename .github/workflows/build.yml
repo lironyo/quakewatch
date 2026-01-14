@@ -27,6 +27,12 @@ jobs:
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION=$(awk -F' *= *' '/^current_version/ {print $2}' .bumpversion.cfg)
+          fi
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not extract version"
+            exit 1
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: $VERSION"
