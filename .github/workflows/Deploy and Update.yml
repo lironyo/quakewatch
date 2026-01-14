@@ -18,12 +18,18 @@ jobs:
       - name: Checkout main repo
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Get version
         id: version
         run: |
           VERSION=$(awk -F' *= *' '/^current_version/ {print $2}' .bumpversion.cfg)
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not extract version from .bumpversion.cfg"
+            cat .bumpversion.cfg
+            exit 1
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Using version: $VERSION"
 
