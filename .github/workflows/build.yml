@@ -60,12 +60,15 @@ jobs:
           # Update README.md
           sed -i "s|docker pull lironyo98/flask_quakeqatch:.*|docker pull lironyo98/flask_quakeqatch:${VERSION}|g" README.md
           
+          # Update .bumpversion.cfg
+          sed -i "s|current_version = .*|current_version = ${VERSION}|" .bumpversion.cfg
+          
           echo "✓ Updated all version references to ${VERSION}"
 
-      - name: Commit version updates
+      - name: Commit version updates .bumpversion.cfg
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          git add docker-compose.yml Install-README.md pod.yaml k8s/deployment.yaml README.md
+          git add docker-compose.yml Install-README.md pod.yaml k8s/deployment.yaml README.md .bumpversion.cfg
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
