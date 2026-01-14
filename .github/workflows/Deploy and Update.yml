@@ -39,7 +39,7 @@ jobs:
           TOKEN="${{ secrets.HELM_REPO_TOKEN }}"
           
           git clone --depth 1 https://x-access-token:${TOKEN}@github.com/lironyo/quakewatch-chart.git helm-repo
-          cd helm-repo
+          cd helm-repo/quakewatch
           
           if [ ! -f values-prod.yaml ] || [ ! -f Chart.yaml ]; then
             echo "Error: values-prod.yaml or Chart.yaml not found"
