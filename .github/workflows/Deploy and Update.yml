@@ -39,9 +39,9 @@ jobs:
           TOKEN="${{ secrets.HELM_REPO_TOKEN }}"
           
           git clone --depth 1 https://x-access-token:${TOKEN}@github.com/lironyo/quakewatch-chart.git helm-repo
-          cd helm-repo/quakewatch
+          cd helm-repo
           
-          if [ ! -f values-prod.yaml ] || [ ! -f Chart.yaml ]; then
+          if [ ! -f values-prod.yaml ] || [ ! -f quakewatch-chart/Chart.yaml ]; then
             echo "Error: values-prod.yaml or Chart.yaml not found"
             exit 1
           fi
@@ -49,12 +49,12 @@ jobs:
           sed -i "s/tag:.*/tag: \"${VERSION}\"/" values-prod.yaml
           echo "Updated values-prod.yaml with tag: ${VERSION}"
 
-          sed -i "s/^appVersion:.*/appVersion: \"${VERSION}\"/" Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"${VERSION}\"/" quakewatch-chart/Chart.yaml
           echo "Updated Chart.yaml appVersion to ${VERSION}"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add values-prod.yaml Chart.yaml
+          git add values-prod.yaml quakewatch-chart/Chart.yaml
           
           if git diff --cached --quiet; then
             echo "No changes to commit"
