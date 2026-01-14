@@ -1,4 +1,4 @@
-name: Update Helm Chart
+name: Deploy and Update
 
 permissions:
   contents: read
@@ -38,25 +38,28 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           TOKEN="${{ secrets.HELM_REPO_TOKEN }}"
           
-          git clone --depth 1 https://x-access-token:${TOKEN}@github.com/lironyo98/flask_quakeqatch-chart.git helm-repo
+          git clone --depth 1 https://x-access-token:${TOKEN}@github.com/lironyo/quakewatch-chart.git helm-repo
           cd helm-repo
           
-          if [ ! -f values-prod.yaml ]; then
-            echo "Error: values-prod.yaml not found"
+          if [ ! -f values-prod.yaml ] || [ ! -f Chart.yaml ]; then
+            echo "Error: values-prod.yaml or Chart.yaml not found"
             exit 1
           fi
           
           sed -i "s/tag:.*/tag: \"${VERSION}\"/" values-prod.yaml
           echo "Updated values-prod.yaml with tag: ${VERSION}"
-          
+
+          sed -i "s/^appVersion:.*/appVersion: \"${VERSION}\"/" Chart.yaml
+          echo "Updated Chart.yaml appVersion to ${VERSION}"
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add values-prod.yaml
+          git add values-prod.yaml Chart.yaml
           
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: update image to ${VERSION}"
+            git commit -m "chore: update app version to ${VERSION}"
             git push origin main
-            echo "✓ Updated Helm chart to ${VERSION}"
+            echo "✓ Updated Helm chart (appVersion: ${VERSION}, tag: ${VERSION})"
           fi

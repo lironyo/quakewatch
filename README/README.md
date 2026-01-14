@@ -91,6 +91,7 @@ pull the image from Doker Hub
 # Access the Application:
 
    Open your browser and visit [http://127.0.0.1:5000](http://127.0.0.1:5000) to view the dashboard.
+<<<<<<< HEAD
 
 ## Custom Jinja2 Filter
 
@@ -100,3 +101,5 @@ The project includes a custom filter `timestamp_to_str` that converts epoch time
 
 - **SSL Warning:** You might see a warning regarding LibreSSL when using urllib3. This is informational and does not affect the functionality of the application.
 - **Matplotlib Backend:** The application forces Matplotlib to use the `Agg` backend for headless rendering. Ensure this setting is applied before any Matplotlib imports to avoid GUI-related errors.
+=======
+>>>>>>> origin/main
